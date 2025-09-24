@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الناخبين</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            padding-top: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: #f8f9fa;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--secondary-color);
+            background-color: #e8f4fd;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .preview-card {
+            width: 150px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .preview-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .preview-info {
+            padding: 10px;
+            text-align: center;
+            background-color: #f8f9fa;
+        }
+        
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .required-field::after {
+            content: " *";
+            color: var(--accent-color);
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .preview-card {
+                width: 100%;
+                max-width: 200px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- الهيدر -->
+        <div class="header">
+            <h4>نظام إدارة الناخبين</h4>
+            <div>
+                <span class="badge bg-primary" id="coordinatorBadge">مرتكز: أحمد السيد (رقم: 12345)</span>
+            </div>
+        </div>
+        
+        <!-- نموذج إضافة ناخب -->
+        <div class="card">
+            <div class="card-header">
+                <h5>إضافة ناخب جديد</h5>
+            </div>
+            <div class="card-body">
+                <form id="voterForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="voterName" class="form-label required-field">اسم الناخب الكامل</label>
+                                <input type="text" class="form-control" id="voterName" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="voterCardNumber" class="form-label required-field">رقم بطاقة الناخب</label>
+                                <input type="text" class="form-control" id="voterCardNumber" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="electionCenter" class="form-label required-field">رقم مركز الانتخاب</label>
+                                <input type="text" class="form-control" id="electionCenter" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="stationNumber" class="form-label required-field">رقم المحطة</label>
+                                <input type="text" class="form-control" id="stationNumber" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="region" class="form-label required-field">المنطقة</label>
+                                <select class="form-select" id="region" required>
+                                    <option value="">اختر المنطقة</option>
+                                    <option value="الشمالية">المنطقة الشمالية</option>
+                                    <option value="الجنوبية">المنطقة الجنوبية</option>
+                                    <option value="الشرقية">المنطقة الشرقية</option>
+                                    <option value="الغربية">المنطقة الغربية</option>
+                                    <option value="الوسطى">المنطقة الوسطى</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="coordinatorId" class="form-label required-field">رقم معرف المرتكز</label>
+                                <input type="text" class="form-control" id="coordinatorId" value="12345" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label required-field">صورة بطاقة الناخب</label>
+                                <div class="upload-area" id="voterCardArea">
+                                    <div class="upload-icon">
+                                        <i class="bi bi-person-badge"></i>
+                                    </div>
+                                    <p>انقر أو اسحب الصورة هنا</p>
+                                    <input type="file" id="voterCardInput" accept="image/*" class="d-none">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- معاينة الصور -->
+                    <div class="preview-container" id="previewContainer">
+                        <!-- سيتم إضافة معاينات الصور هنا -->
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">حفظ بيانات الناخب</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- قائمة الناخبين -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>قائمة الناخبين المسجلين</h5>
+                <span class="badge bg-secondary" id="votersCount">0 ناخب</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>اسم الناخب</th>
+                                <th>رقم البطاقة</th>
+                                <th>مركز الانتخاب</th>
+                                <th>رقم المحطة</th>
+                                <th>المنطقة</th>
+                                <th>معرف المرتكز</th>
+                                <th>المستندات</th>
+                                <th>تاريخ التسجيل</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="votersTable">
+                            <!-- سيتم ملء هذا الجدول بالبيانات -->
+                            <tr>
+                                <td colspan="9" class="text-center">لا توجد بيانات</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نموذج عرض الصور -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalTitle">معاينة الصورة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="modalImage" src="" class="img-fluid" alt="معاينة الصورة">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // تهيئة التخزين إذا لم يكن موجوداً
+            initializeStorage();
+            
+            // تحميل البيانات عند فتح الصفحة
+            loadVotersData();
+            
+            // أحداث النماذج
+            document.getElementById('voterForm').addEventListener('submit', addVoter);
+            
+            // أحداث مناطق الرفع
+            setupUploadArea('voterCardArea', 'voterCardInput', 'بطاقة الناخب');
+            
+            // كائن لحفظ بيانات الصور المؤقتة
+            const tempImages = {
+                voterCard: null
+            };
+            
+            // وظائف التهيئة
+            function initializeStorage() {
+                if (!localStorage.getItem('voters')) {
+                    localStorage.setItem('voters', JSON.stringify([]));
+                }
+            }
+            
+            function setupUploadArea(areaId, inputId, label) {
+                const area = document.getElementById(areaId);
+                const input = document.getElementById(inputId);
+                
+                area.addEventListener('click', () => {
+                    input.click();
+                });
+                
+                area.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    area.style.borderColor = '#3498db';
+                    area.style.backgroundColor = '#e8f4fd';
+                });
+                
+                area.addEventListener('dragleave', () => {
+                    area.style.borderColor = '#ccc';
+                    area.style.backgroundColor = '#f8f9fa';
+                });
+                
+                area.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    area.style.borderColor = '#ccc';
+                    area.style.backgroundColor = '#f8f9fa';
+                    
+                    if (e.dataTransfer.files.length) {
+                        handleImageUpload(e.dataTransfer.files[0], inputId, label);
+                    }
+                });
+                
+                input.addEventListener('change', () => {
+                    if (input.files.length) {
+                        handleImageUpload(input.files[0], inputId, label);
+                    }
+                });
+            }
+            
+            function handleImageUpload(file, inputId, label) {
+                if (!file.type.match('image.*')) {
+                    alert('يرجى اختيار ملف صورة فقط');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // حفظ البيانات حسب نوع الصورة
+                    if (inputId === 'voterCardInput') {
+                        tempImages.voterCard = e.target.result;
+                    }
+                    
+                    // إضافة معاينة للصورة
+                    addImagePreview(e.target.result, label);
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            function addImagePreview(dataUrl, label) {
+                const previewContainer = document.getElementById('previewContainer');
+                
+                // التحقق إذا كانت المعاينة موجودة بالفعل
+                const existingPreview = document.getElementById(`preview-${label}`);
+                if (existingPreview) {
+                    existingPreview.remove();
+                }
+                
+                const previewId = `preview-${Date.now()}`;
+                
+                const previewCard = document.createElement('div');
+                previewCard.className = 'preview-card';
+                previewCard.id = `preview-${label}`;
+                
+                previewCard.innerHTML = `
+                    <img src="${dataUrl}" class="preview-image" alt="${label}">
+                    <div class="preview-info">
+                        <small>${label}</small>
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary view-btn" data-image="${dataUrl}" data-label="${label}">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-btn" data-target="${label}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                previewContainer.appendChild(previewCard);
+                
+                // إضافة حدث لعرض الصورة
+                previewCard.querySelector('.view-btn').addEventListener('click', function() {
+                    const imageUrl = this.getAttribute('data-image');
+                    const imageLabel = this.getAttribute('data-label');
+                    
+                    document.getElementById('modalImage').src = imageUrl;
+                    document.getElementById('imageModalTitle').textContent = `معاينة ${imageLabel}`;
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+                    modal.show();
+                });
+                
+                // إضافة حدث لإزالة الصورة
+                previewCard.querySelector('.remove-btn').addEventListener('click', function() {
+                    const target = this.getAttribute('data-target');
+                    
+                    // حذف البيانات المؤقتة
+                    if (target === 'بطاقة الناخب') {
+                        tempImages.voterCard = null;
+                    }
+                    
+                    // إعادة تعيين حقل الرفع
+                    if (target === 'بطاقة الناخب') {
+                        document.getElementById('voterCardInput').value = '';
+                    }
+                    
+                    // إزالة المعاينة
+                    previewCard.remove();
+                });
+            }
+            
+            function addVoter(e) {
+                e.preventDefault();
+                
+                const voterName = document.getElementById('voterName').value;
+                const voterCardNumber = document.getElementById('voterCardNumber').value;
+                const electionCenter = document.getElementById('electionCenter').value;
+                const stationNumber = document.getElementById('stationNumber').value;
+                const region = document.getElementById('region').value;
+                const coordinatorId = document.getElementById('coordinatorId').value;
+                
+                // التحقق من الحقول المطلوبة
+                if (!voterName || !voterCardNumber || !electionCenter || !stationNumber || !region) {
+                    alert('يرجى ملء جميع الحقول الإلزامية');
+                    return;
+                }
+                
+                // التحقق من رفع الصور
+                if (!tempImages.voterCard) {
+                    alert('يرجى رفع صورة بطاقة الناخب');
+                    return;
+                }
+                
+                const voters = JSON.parse(localStorage.getItem('voters'));
+                const newVoter = {
+                    id: Date.now(),
+                    name: voterName,
+                    voterCardNumber: voterCardNumber,
+                    electionCenter: electionCenter,
+                    stationNumber: stationNumber,
+                    region: region,
+                    coordinatorId: coordinatorId,
+                    voterCard: tempImages.voterCard,
+                    date: new Date().toISOString()
+                };
+                
+                voters.push(newVoter);
+                localStorage.setItem('voters', JSON.stringify(voters));
+                
+                // إعادة تعيين النموذج
+                document.getElementById('voterForm').reset();
+                document.getElementById('coordinatorId').value = "12345"; // إعادة تعيين قيمة ثابتة
+                
+                // مسح معاينات الصور
+                document.getElementById('previewContainer').innerHTML = '';
+                
+                // إعادة تعيين الصور المؤقتة
+                tempImages.voterCard = null;
+                
+                // تحديث الجدول
+                loadVotersData();
+                
+                alert('تم إضافة الناخب بنجاح');
+            }
+            
+            function loadVotersData() {
+                const voters = JSON.parse(localStorage.getItem('voters'));
+                const votersTable = document.getElementById('votersTable');
+                const votersCount = document.getElementById('votersCount');
+                
+                votersTable.innerHTML = '';
+                votersCount.textContent = `${voters.length} ناخب`;
+                
+                if (voters.length === 0) {
+                    votersTable.innerHTML = '<tr><td colspan="9" class="text-center">لا توجد بيانات</td></tr>';
+                    return;
+                }
+                
+                voters.forEach(voter => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${voter.name}</td>
+                        <td>${voter.voterCardNumber}</td>
+                        <td>${voter.electionCenter}</td>
+                        <td>${voter.stationNumber}</td>
+                        <td>${voter.region}</td>
+                        <td>${voter.coordinatorId}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary view-docs-btn" data-voter-id="${voter.id}">
+                                <i class="bi bi-eye"></i> عرض المستند
+                            </button>
+                        </td>
+                        <td>${new Date(voter.date).toLocaleDateString('ar-EG')}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteVoter(${voter.id})">
+                                <i class="bi bi-trash"></i> حذف
+                            </button>
+                        </td>
+                    `;
+                    votersTable.appendChild(row);
+                });
+                
+                // إضافة أحداث لعرض المستندات
+                document.querySelectorAll('.view-docs-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const voterId = this.getAttribute('data-voter-id');
+                        const voter = voters.find(v => v.id == voterId);
+                        
+                        if (voter) {
+                            // إنشاء محتوى المعاينة
+                            const modalBody = document.querySelector('#imageModal .modal-body');
+                            modalBody.innerHTML = `
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <h6>بطاقة الناخب</h6>
+                                        <img src="${voter.voterCard}" class="img-thumbnail" style="width: 100%; max-height: 400px; object-fit: contain;">
+                                    </div>
+                                </div>
+                            `;
+                            
+                            document.getElementById('imageModalTitle').textContent = `بطاقة الناخب: ${voter.name}`;
+                            
+                            const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+                            modal.show();
+                        }
+                    });
+                });
+            }
+            
+            // وظيفة حذف الناخب (معرفة عامة للوصول من الأزرار)
+            window.deleteVoter = function(id) {
+                if (confirm('هل أنت متأكد من أنك تريد حذف هذا الناخب؟')) {
+                    let voters = JSON.parse(localStorage.getItem('voters'));
+                    voters = voters.filter(v => v.id !== id);
+                    localStorage.setItem('voters', JSON.stringify(voters));
+                    loadVotersData();
+                }
+            };
+        });
+    </script>
+</body>
+</html>
